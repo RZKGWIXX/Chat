@@ -8,9 +8,9 @@ interface MessageFeedProps {
 export function MessageFeed({ messages }: MessageFeedProps) {
   if (messages.length === 0) {
     return (
-      <div className="px-4 py-8">
+      <div className="px-3 sm:px-4 py-6 sm:py-8">
         <div className="flex justify-center mb-6">
-          <div className="bg-dark-secondary rounded-lg px-4 py-3 max-w-sm text-center">
+          <div className="bg-dark-secondary rounded-lg px-3 sm:px-4 py-3 max-w-xs sm:max-w-sm text-center mx-2">
             <p className="text-dark-text-secondary text-sm">Welcome to Corp.OS Channel</p>
             <p className="text-dark-text-muted text-xs mt-1">Official updates and announcements</p>
           </div>
@@ -20,10 +20,10 @@ export function MessageFeed({ messages }: MessageFeedProps) {
   }
 
   return (
-    <div className="px-4 py-4 space-y-4">
+    <div className="px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4">
       {/* Welcome Message */}
-      <div className="flex justify-center mb-6">
-        <div className="bg-dark-secondary rounded-lg px-4 py-3 max-w-sm text-center">
+      <div className="flex justify-center mb-4 sm:mb-6">
+        <div className="bg-dark-secondary rounded-lg px-3 sm:px-4 py-3 max-w-xs sm:max-w-sm text-center mx-2">
           <p className="text-dark-text-secondary text-sm">Welcome to Corp.OS Channel</p>
           <p className="text-dark-text-muted text-xs mt-1">Official updates and announcements</p>
         </div>

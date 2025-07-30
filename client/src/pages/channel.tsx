@@ -10,26 +10,26 @@ export default function Channel() {
   });
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-dark-bg">
+    <div className="flex flex-col h-screen w-full max-w-4xl mx-auto bg-dark-bg">
       {/* Header */}
-      <header className="bg-dark-secondary border-b border-dark-tertiary px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-telegram-blue rounded-full flex items-center justify-center font-bold text-lg text-white">
+      <header className="bg-dark-secondary border-b border-dark-tertiary px-3 sm:px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-telegram-blue rounded-full flex items-center justify-center font-bold text-sm sm:text-lg text-white flex-shrink-0">
             C
           </div>
-          <div>
-            <h1 className="text-lg font-semibold text-dark-text">Corp.OS Channel</h1>
-            <p className="text-sm text-dark-text-secondary">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base sm:text-lg font-semibold text-dark-text truncate">Corp.OS Channel</h1>
+            <p className="text-xs sm:text-sm text-dark-text-secondary">
               {messages.length} messages
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <button className="p-2 hover:bg-dark-tertiary rounded-lg transition-colors">
-            <Search className="w-5 h-5 text-dark-text-secondary" />
+        <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+          <button className="p-1.5 sm:p-2 hover:bg-dark-tertiary rounded-lg transition-colors">
+            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-dark-text-secondary" />
           </button>
-          <button className="p-2 hover:bg-dark-tertiary rounded-lg transition-colors">
-            <Info className="w-5 h-5 text-dark-text-secondary" />
+          <button className="p-1.5 sm:p-2 hover:bg-dark-tertiary rounded-lg transition-colors">
+            <Info className="w-4 h-4 sm:w-5 sm:h-5 text-dark-text-secondary" />
           </button>
         </div>
       </header>

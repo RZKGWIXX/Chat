@@ -127,16 +127,16 @@ export function AdminComposer() {
   };
 
   return (
-    <div className="bg-dark-secondary border-t border-dark-tertiary p-4 sticky bottom-0">
+    <div className="bg-dark-secondary border-t border-dark-tertiary p-3 sm:p-4 sticky bottom-0">
       {/* Collapsed State */}
       {!isExpanded && (
-        <div className="mb-4">
+        <div className="mb-3 sm:mb-4">
           <button
-            className="w-full bg-dark-tertiary hover:bg-dark-tertiary/80 transition-colors rounded-lg px-4 py-3 text-left text-dark-text-secondary flex items-center justify-between"
+            className="w-full bg-dark-tertiary hover:bg-dark-tertiary/80 transition-colors rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-left text-dark-text-secondary flex items-center justify-between text-sm sm:text-base"
             onClick={() => setIsExpanded(true)}
           >
             <span>📝 Post new message...</span>
-            <Plus className="w-5 h-5 text-telegram-blue" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-telegram-blue" />
           </button>
         </div>
       )}
@@ -146,19 +146,19 @@ export function AdminComposer() {
         <div>
           {/* File Preview */}
           {selectedFile && previewUrl && (
-            <div className="mb-4 bg-dark-tertiary rounded-lg p-3">
+            <div className="mb-3 sm:mb-4 bg-dark-tertiary rounded-lg p-2 sm:p-3">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-dark-text-secondary">
+                <span className="text-xs sm:text-sm text-dark-text-secondary">
                   {selectedFile.type.startsWith("image/") ? "📷 Image attached" : "🎥 Video attached"}
                 </span>
                 <button
                   className="text-red-400 hover:text-red-300 transition-colors"
                   onClick={removeFile}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
               </div>
-              <div className="w-20 h-20 bg-dark-bg rounded border-2 border-dashed border-dark-text-muted overflow-hidden">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-dark-bg rounded border-2 border-dashed border-dark-text-muted overflow-hidden">
                 {selectedFile.type.startsWith("image/") ? (
                   <img
                     src={previewUrl}
@@ -176,67 +176,72 @@ export function AdminComposer() {
           )}
 
           {/* Message Input */}
-          <div className="relative mb-4">
+          <div className="relative mb-3 sm:mb-4">
             <Textarea
-              className="w-full bg-dark-tertiary border border-dark-tertiary focus:border-telegram-blue rounded-lg px-4 py-3 text-dark-text placeholder-dark-text-muted resize-none focus:outline-none focus:ring-2 focus:ring-telegram-blue/20 transition-all"
-              rows={4}
+              className="w-full bg-dark-tertiary border border-dark-tertiary focus:border-telegram-blue rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-dark-text placeholder-dark-text-muted resize-none focus:outline-none focus:ring-2 focus:ring-telegram-blue/20 transition-all text-sm sm:text-base"
+              rows={3}
               placeholder="Write your message here..."
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
             />
-            <div className="absolute bottom-2 right-2 text-xs text-dark-text-muted">
+            <div className="absolute bottom-1 sm:bottom-2 right-2 text-xs text-dark-text-muted">
               {messageText.length}
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0">
+            <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto">
               <Button
                 variant="ghost"
                 size="sm"
-                className="bg-dark-tertiary hover:bg-dark-tertiary/80 text-dark-text-secondary"
+                className="bg-dark-tertiary hover:bg-dark-tertiary/80 text-dark-text-secondary text-xs sm:text-sm flex-shrink-0"
                 onClick={handleImageUpload}
               >
-                <Image className="w-4 h-4 mr-2 text-telegram-blue" />
-                Photo
+                <Image className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-telegram-blue" />
+                <span className="hidden sm:inline">Photo</span>
+                <span className="sm:hidden">📷</span>
               </Button>
 
               <Button
                 variant="ghost"
                 size="sm"
-                className="bg-dark-tertiary hover:bg-dark-tertiary/80 text-dark-text-secondary"
+                className="bg-dark-tertiary hover:bg-dark-tertiary/80 text-dark-text-secondary text-xs sm:text-sm flex-shrink-0"
                 onClick={handleVideoUpload}
               >
-                <Video className="w-4 h-4 mr-2 text-telegram-blue" />
-                Video
+                <Video className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-telegram-blue" />
+                <span className="hidden sm:inline">Video</span>
+                <span className="sm:hidden">🎥</span>
               </Button>
 
               <Button
                 variant="ghost"
                 size="sm"
-                className="bg-dark-tertiary hover:bg-dark-tertiary/80 text-dark-text-secondary"
+                className="bg-dark-tertiary hover:bg-dark-tertiary/80 text-dark-text-secondary text-xs sm:text-sm flex-shrink-0"
               >
-                <Smile className="w-4 h-4 mr-2 text-telegram-blue" />
-                Emoji
+                <Smile className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-telegram-blue" />
+                <span className="hidden sm:inline">Emoji</span>
+                <span className="sm:hidden">😊</span>
               </Button>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 justify-end">
               <Button
                 variant="ghost"
                 onClick={handleCancel}
-                className="text-dark-text-secondary hover:text-dark-text"
+                className="text-dark-text-secondary hover:text-dark-text text-xs sm:text-sm"
+                size="sm"
               >
                 Cancel
               </Button>
 
               <Button
-                className="bg-telegram-blue hover:bg-telegram-blue/90 text-white"
+                className="bg-telegram-blue hover:bg-telegram-blue/90 text-white text-xs sm:text-sm"
                 onClick={handlePost}
                 disabled={postMessageMutation.isPending}
+                size="sm"
               >
-                <Send className="w-4 h-4 mr-2" />
+                <Send className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 {postMessageMutation.isPending ? "Posting..." : "Post"}
               </Button>
             </div>
@@ -245,13 +250,13 @@ export function AdminComposer() {
       )}
 
       {/* Admin Controls */}
-      <div className="flex items-center justify-center space-x-4 mt-4 pt-4 border-t border-dark-tertiary">
-        <div className="flex items-center space-x-2 text-sm text-dark-text-secondary">
-          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+      <div className="flex items-center justify-center space-x-2 sm:space-x-4 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-dark-tertiary">
+        <div className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-dark-text-secondary">
+          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full flex-shrink-0"></div>
           <span>Admin Mode</span>
         </div>
-        <button className="text-sm text-telegram-blue hover:text-telegram-blue/80 transition-colors flex items-center space-x-1">
-          <Settings className="w-4 h-4" />
+        <button className="text-xs sm:text-sm text-telegram-blue hover:text-telegram-blue/80 transition-colors flex items-center space-x-1">
+          <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
           <span>Settings</span>
         </button>
       </div>
