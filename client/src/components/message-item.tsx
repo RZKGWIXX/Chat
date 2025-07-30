@@ -29,7 +29,7 @@ export function MessageItem({ message }: MessageItemProps) {
   }, []);
 
   // Available emoji reactions
-  const emojiReactions = ['❤️', '👍', '👎', '🔥', '😍', '👏', '😂'];
+  const emojiReactions = ['❤️', '👍', '👎', '🔥', '😍', '👏', '😂', '😢', '😮', '🎉', '💯', '🤔', '😴', '🤮', '🚀', '⚡', '💪', '🙏'];
 
   const incrementViewMutation = useMutation({
     mutationFn: async (messageId: string) => {
@@ -308,26 +308,30 @@ export function MessageItem({ message }: MessageItemProps) {
       {/* Emoji reaction bar */}
       {showEmojiBar && (
         <div 
-          className="fixed z-50 bg-dark-secondary rounded-full px-3 py-2 shadow-lg border border-dark-tertiary"
+          className="fixed z-50 bg-dark-secondary rounded-xl px-3 py-2 shadow-lg border border-dark-tertiary max-w-[90vw]"
           style={{
-            left: Math.min(contextMenuPosition.x, window.innerWidth - 300),
-            top: Math.max(contextMenuPosition.y - 60, 10),
+            left: Math.min(contextMenuPosition.x, window.innerWidth - 400),
+            top: Math.max(contextMenuPosition.y - 70, 10),
           }}
         >
-          <div className="flex items-center space-x-2">
-            {emojiReactions.map((emoji, index) => (
-              <button
-                key={index}
-                className="text-2xl hover:scale-110 transition-transform p-1 rounded-full hover:bg-white/10"
-                onClick={() => handleEmojiReaction(emoji)}
-              >
-                {emoji}
-              </button>
-            ))}
-            <div className="w-px h-6 bg-white/20 mx-2" />
+          <div className="flex items-center space-x-1 overflow-x-auto">
+            <div className="flex items-center space-x-1 flex-nowrap">
+              {emojiReactions.map((emoji, index) => (
+                <button
+                  key={index}
+                  className="text-xl hover:scale-110 transition-transform p-2 rounded-full hover:bg-white/10 flex-shrink-0"
+                  onClick={() => handleEmojiReaction(emoji)}
+                  title={`React with ${emoji}`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+            <div className="w-px h-6 bg-white/20 mx-2 flex-shrink-0" />
             <button
-              className="text-white/70 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
+              className="text-white/70 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 flex-shrink-0 text-lg"
               onClick={closeContextMenu}
+              title="Close"
             >
               ×
             </button>
@@ -346,7 +350,10 @@ export function MessageItem({ message }: MessageItemProps) {
         >
           <button
             className="w-full px-4 py-2 text-left text-white hover:bg-dark-tertiary transition-colors flex items-center space-x-3"
-            onClick={handleCopy}
+            onClick={() => {
+              handleReaction();
+              closeContextMenu();
+            }}
           >
             <Reply className="w-4 h-4" />
             <span>Reply</span>
@@ -362,22 +369,6 @@ export function MessageItem({ message }: MessageItemProps) {
           
           <button
             className="w-full px-4 py-2 text-left text-white hover:bg-dark-tertiary transition-colors flex items-center space-x-3"
-            onClick={closeContextMenu}
-          >
-            <Share className="w-4 h-4" />
-            <span>Copy Link</span>
-          </button>
-          
-          <button
-            className="w-full px-4 py-2 text-left text-white hover:bg-dark-tertiary transition-colors flex items-center space-x-3"
-            onClick={closeContextMenu}
-          >
-            <Share className="w-4 h-4" />
-            <span>Forward</span>
-          </button>
-          
-          <button
-            className="w-full px-4 py-2 text-left text-white hover:bg-dark-tertiary transition-colors flex items-center space-x-3"
             onClick={handlePin}
           >
             <Pin className="w-4 h-4" />
@@ -386,15 +377,13 @@ export function MessageItem({ message }: MessageItemProps) {
           
           <button
             className="w-full px-4 py-2 text-left text-white hover:bg-dark-tertiary transition-colors flex items-center space-x-3"
-            onClick={closeContextMenu}
-          >
-            <Languages className="w-4 h-4" />
-            <span>Translate</span>
-          </button>
-          
-          <button
-            className="w-full px-4 py-2 text-left text-white hover:bg-dark-tertiary transition-colors flex items-center space-x-3"
-            onClick={closeContextMenu}
+            onClick={() => {
+              toast({
+                title: "Edit feature",
+                description: "Message editing will be available soon",
+              });
+              closeContextMenu();
+            }}
           >
             <Edit className="w-4 h-4" />
             <span>Edit</span>
