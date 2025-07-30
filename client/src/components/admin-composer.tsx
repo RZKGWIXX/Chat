@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Image, Video, Smile, Send, X, Settings } from "lucide-react";
+import { Plus, Image, Video, Smile, Send, X, Settings, FileText, Paperclip } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +14,7 @@ export function AdminComposer() {
   
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -77,6 +78,10 @@ export function AdminComposer() {
     videoInputRef.current?.click();
   };
 
+  const handleFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -88,6 +93,15 @@ export function AdminComposer() {
     const file = e.target.files?.[0];
     if (file) {
       handleFileSelect(file, "video");
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      // No preview URL for regular files
+      setPreviewUrl(null);
     }
   };
 
@@ -109,9 +123,16 @@ export function AdminComposer() {
       return;
     }
 
-    const messageType = selectedFile ? 
-      (selectedFile.type.startsWith("image/") ? "image" : "video") : 
-      "text";
+    let messageType = "text";
+    if (selectedFile) {
+      if (selectedFile.type.startsWith("image/")) {
+        messageType = "image";
+      } else if (selectedFile.type.startsWith("video/")) {
+        messageType = "video";
+      } else {
+        messageType = "file";
+      }
+    }
 
     postMessageMutation.mutate({
       content: messageText,
@@ -145,11 +166,13 @@ export function AdminComposer() {
       {isExpanded && (
         <div>
           {/* File Preview */}
-          {selectedFile && previewUrl && (
+          {selectedFile && (
             <div className="mb-3 sm:mb-4 bg-dark-tertiary rounded-lg p-2 sm:p-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs sm:text-sm text-dark-text-secondary">
-                  {selectedFile.type.startsWith("image/") ? "📷 Image attached" : "🎥 Video attached"}
+                  {selectedFile.type.startsWith("image/") ? "📷 Image attached" : 
+                   selectedFile.type.startsWith("video/") ? "🎥 Video attached" :
+                   "📎 File attached"}
                 </span>
                 <button
                   className="text-red-400 hover:text-red-300 transition-colors"
@@ -158,20 +181,31 @@ export function AdminComposer() {
                   <X className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
               </div>
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-dark-bg rounded border-2 border-dashed border-dark-text-muted overflow-hidden">
-                {selectedFile.type.startsWith("image/") ? (
-                  <img
-                    src={previewUrl}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <video
-                    src={previewUrl}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
+              
+              {previewUrl ? (
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-dark-bg rounded border-2 border-dashed border-dark-text-muted overflow-hidden">
+                  {selectedFile.type.startsWith("image/") ? (
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <video
+                      src={previewUrl}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2 bg-dark-bg rounded p-2">
+                  <FileText className="w-4 h-4 text-telegram-blue" />
+                  <span className="text-xs text-dark-text truncate">{selectedFile.name}</span>
+                  <span className="text-xs text-dark-text-muted">
+                    ({(selectedFile.size / 1024).toFixed(1)} KB)
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
@@ -212,6 +246,17 @@ export function AdminComposer() {
                 <Video className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-telegram-blue" />
                 <span className="hidden sm:inline">Video</span>
                 <span className="sm:hidden">🎥</span>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="bg-dark-tertiary hover:bg-dark-tertiary/80 text-dark-text-secondary text-xs sm:text-sm flex-shrink-0"
+                onClick={handleFileUpload}
+              >
+                <Paperclip className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-telegram-blue" />
+                <span className="hidden sm:inline">File</span>
+                <span className="sm:hidden">📎</span>
               </Button>
 
               <Button
@@ -275,6 +320,13 @@ export function AdminComposer() {
         accept="video/*"
         className="hidden"
         onChange={handleVideoChange}
+      />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="*/*"
+        className="hidden"
+        onChange={handleFileChange}
       />
     </div>
   );

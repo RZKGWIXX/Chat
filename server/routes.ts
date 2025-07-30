@@ -85,6 +85,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Toggle pin status for a message
+  app.post("/api/messages/:id/pin", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.togglePin(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to toggle pin status" });
+    }
+  });
+
+  // Add reaction to a message
+  app.post("/api/messages/:id/reaction", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.addReaction(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to add reaction" });
+    }
+  });
+
+  // Delete a message
+  app.delete("/api/messages/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteMessage(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete message" });
+    }
+  });
+
+  // Search messages
+  app.get("/api/messages/search", async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== "string") {
+        return res.status(400).json({ error: "Search query is required" });
+      }
+      const messages = await storage.searchMessages(q);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to search messages" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

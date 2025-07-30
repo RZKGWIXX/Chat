@@ -10,6 +10,10 @@ export interface IStorage {
   getAllMessages(): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   incrementViewCount(messageId: string): Promise<void>;
+  togglePin(messageId: string): Promise<void>;
+  addReaction(messageId: string): Promise<void>;
+  deleteMessage(messageId: string): Promise<void>;
+  searchMessages(query: string): Promise<Message[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -52,6 +56,8 @@ export class MemStorage implements IStorage {
       mediaUrl: insertMessage.mediaUrl || null,
       mediaFilename: insertMessage.mediaFilename || null,
       viewCount: 0,
+      isPinned: 0,
+      reactionCount: 0,
       createdAt: new Date(),
     };
     this.messages.set(id, message);
@@ -64,6 +70,35 @@ export class MemStorage implements IStorage {
       message.viewCount += 1;
       this.messages.set(messageId, message);
     }
+  }
+
+  async togglePin(messageId: string): Promise<void> {
+    const message = this.messages.get(messageId);
+    if (message) {
+      message.isPinned = message.isPinned ? 0 : 1;
+      this.messages.set(messageId, message);
+    }
+  }
+
+  async addReaction(messageId: string): Promise<void> {
+    const message = this.messages.get(messageId);
+    if (message) {
+      message.reactionCount += 1;
+      this.messages.set(messageId, message);
+    }
+  }
+
+  async deleteMessage(messageId: string): Promise<void> {
+    this.messages.delete(messageId);
+  }
+
+  async searchMessages(query: string): Promise<Message[]> {
+    const allMessages = Array.from(this.messages.values());
+    const filtered = allMessages.filter(message => 
+      message.content.toLowerCase().includes(query.toLowerCase()) ||
+      (message.mediaFilename && message.mediaFilename.toLowerCase().includes(query.toLowerCase()))
+    );
+    return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 }
 
