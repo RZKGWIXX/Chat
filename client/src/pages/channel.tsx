@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Info, X } from "lucide-react";
 import { MessageFeed } from "@/components/message-feed";
 import { AdminComposer } from "@/components/admin-composer";
+import { PinnedBar } from "@/components/pinned-bar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { Message } from "@shared/schema";
@@ -10,6 +11,7 @@ import type { Message } from "@shared/schema";
 export default function Channel() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const messageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const { data: messages = [], isLoading } = useQuery<Message[]>({
     queryKey: ["/api/messages"],
@@ -28,12 +30,29 @@ export default function Channel() {
 
   const displayMessages = searchQuery.trim() ? searchResults : messages;
   
-  // Sort messages with pinned ones first
+  // Find pinned message
+  const pinnedMessage = displayMessages.find(msg => msg.isPinned);
+  
+  // Sort messages chronologically (pinned messages are shown in the pinned bar)
   const sortedMessages = [...displayMessages].sort((a, b) => {
-    if (a.isPinned && !b.isPinned) return -1;
-    if (!a.isPinned && b.isPinned) return 1;
     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
   });
+
+  // Function to scroll to a specific message
+  const scrollToMessage = (messageId: string) => {
+    const messageElement = messageRefs.current[messageId];
+    if (messageElement) {
+      messageElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+      // Add highlight effect
+      messageElement.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+      setTimeout(() => {
+        messageElement.style.backgroundColor = '';
+      }, 2000);
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen w-full max-w-4xl mx-auto bg-dark-bg">
@@ -96,6 +115,14 @@ export default function Channel() {
         )}
       </header>
 
+      {/* Pinned message bar */}
+      {pinnedMessage && !searchQuery.trim() && (
+        <PinnedBar 
+          pinnedMessage={pinnedMessage} 
+          onScrollToMessage={scrollToMessage} 
+        />
+      )}
+
       {/* Message Feed */}
       <main className="flex-1 overflow-y-auto">
         {isLoading || isSearching ? (
@@ -105,7 +132,10 @@ export default function Channel() {
             </div>
           </div>
         ) : (
-          <MessageFeed messages={sortedMessages} />
+          <MessageFeed 
+            messages={sortedMessages} 
+            messageRefs={messageRefs}
+          />
         )}
       </main>
 

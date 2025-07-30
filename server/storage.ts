@@ -11,7 +11,7 @@ export interface IStorage {
   createMessage(message: InsertMessage): Promise<Message>;
   incrementViewCount(messageId: string): Promise<void>;
   togglePin(messageId: string): Promise<void>;
-  toggleReaction(messageId: string, userId: string): Promise<void>;
+  toggleReaction(messageId: string, userId: string, emoji?: string): Promise<void>;
   deleteMessage(messageId: string): Promise<void>;
   searchMessages(query: string): Promise<Message[]>;
 }
@@ -59,6 +59,7 @@ export class MemStorage implements IStorage {
       isPinned: 0,
       reactionCount: 0,
       userReactions: "[]",
+      reactions: "{}",
       createdAt: new Date(),
     };
     this.messages.set(id, message);
@@ -81,23 +82,31 @@ export class MemStorage implements IStorage {
     }
   }
 
-  async toggleReaction(messageId: string, userId: string = "anonymous"): Promise<void> {
+  async toggleReaction(messageId: string, userId: string = "anonymous", emoji: string = "❤️"): Promise<void> {
     const message = this.messages.get(messageId);
     if (message) {
-      const userReactions = JSON.parse(message.userReactions || "[]");
-      const userIndex = userReactions.indexOf(userId);
+      const reactions = JSON.parse(message.reactions || "{}");
+      
+      if (!reactions[emoji]) {
+        reactions[emoji] = [];
+      }
+      
+      const userIndex = reactions[emoji].indexOf(userId);
       
       if (userIndex > -1) {
         // Remove reaction
-        userReactions.splice(userIndex, 1);
-        message.reactionCount = Math.max(0, message.reactionCount - 1);
+        reactions[emoji].splice(userIndex, 1);
+        if (reactions[emoji].length === 0) {
+          delete reactions[emoji];
+        }
       } else {
         // Add reaction
-        userReactions.push(userId);
-        message.reactionCount = userReactions.length;
+        reactions[emoji].push(userId);
       }
       
-      message.userReactions = JSON.stringify(userReactions);
+      // Calculate total reaction count
+      message.reactionCount = Object.values(reactions).reduce((total: number, users: any) => total + users.length, 0);
+      message.reactions = JSON.stringify(reactions);
       this.messages.set(messageId, message);
     }
   }

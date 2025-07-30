@@ -139,11 +139,34 @@ export function MessageItem({ message }: MessageItemProps) {
     }
   };
 
+  const emojiReactionMutation = useMutation({
+    mutationFn: async ({ messageId, emoji }: { messageId: string; emoji: string }) => {
+      await apiRequest("POST", `/api/messages/${messageId}/reaction`, { userId, emoji });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+    },
+  });
+
   const handleEmojiReaction = (emoji: string) => {
-    addReactionMutation.mutate(message.id);
+    emojiReactionMutation.mutate({ messageId: message.id, emoji });
     setShowContextMenu(false);
     setShowEmojiBar(false);
   };
+
+  // Parse reactions from message
+  const messageReactions = React.useMemo(() => {
+    try {
+      const reactions = JSON.parse(message.reactions || "{}");
+      return Object.entries(reactions).map(([emoji, users]) => ({
+        emoji,
+        count: (users as string[]).length,
+        users: users as string[]
+      })).filter(r => r.count > 0);
+    } catch {
+      return [];
+    }
+  }, [message.reactions]);
 
   const closeContextMenu = () => {
     setShowContextMenu(false);
@@ -271,12 +294,6 @@ export function MessageItem({ message }: MessageItemProps) {
                     <Eye className="w-3 h-3" />
                     <span>{formatViews(message.viewCount)}</span>
                   </div>
-                  {message.reactionCount > 0 && (
-                    <div className="flex items-center space-x-1">
-                      <Heart className="w-3 h-3 fill-red-400 text-red-400" />
-                      <span>{message.reactionCount}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -292,17 +309,31 @@ export function MessageItem({ message }: MessageItemProps) {
                     <Eye className="w-3 h-3" />
                     <span>{formatViews(message.viewCount)}</span>
                   </div>
-                  {message.reactionCount > 0 && (
-                    <div className="flex items-center space-x-1">
-                      <Heart className="w-3 h-3 fill-red-400 text-red-400" />
-                      <span>{message.reactionCount}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
           )}
         </div>
+
+        {/* Reaction display under the message */}
+        {messageReactions.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1 mr-4">
+            {messageReactions.map(({ emoji, count, users }) => (
+              <button
+                key={emoji}
+                className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs transition-colors ${
+                  users.includes(userId) 
+                    ? 'bg-telegram-blue/20 border border-telegram-blue/40' 
+                    : 'bg-white/10 border border-white/20 hover:bg-white/20'
+                }`}
+                onClick={() => emojiReactionMutation.mutate({ messageId: message.id, emoji })}
+              >
+                <span className="text-sm">{emoji}</span>
+                <span className="text-white/80 font-medium">{count}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Emoji reaction bar */}

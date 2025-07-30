@@ -13,6 +13,7 @@ export const messages = pgTable("messages", {
   isPinned: integer("is_pinned").notNull().default(0),
   reactionCount: integer("reaction_count").notNull().default(0),
   userReactions: text("user_reactions").notNull().default("[]"), // JSON array of user IDs who liked
+  reactions: text("reactions").notNull().default("{}"), // JSON object with emoji reactions
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 

@@ -101,7 +101,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const userId = req.body.userId || "anonymous";
-      await storage.toggleReaction(id, userId);
+      const emoji = req.body.emoji || "❤️";
+      await storage.toggleReaction(id, userId, emoji);
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to toggle reaction" });

@@ -1,11 +1,13 @@
+import React from "react";
 import { MessageItem } from "@/components/message-item";
 import type { Message } from "@shared/schema";
 
 interface MessageFeedProps {
   messages: Message[];
+  messageRefs?: React.MutableRefObject<{ [key: string]: HTMLDivElement | null }>;
 }
 
-export function MessageFeed({ messages }: MessageFeedProps) {
+export function MessageFeed({ messages, messageRefs }: MessageFeedProps) {
   if (messages.length === 0) {
     return (
       <div className="px-3 sm:px-4 py-6 sm:py-8">
@@ -31,7 +33,16 @@ export function MessageFeed({ messages }: MessageFeedProps) {
 
       {/* Messages */}
       {messages.map((message) => (
-        <MessageItem key={message.id} message={message} />
+        <div 
+          key={message.id}
+          ref={(el) => {
+            if (messageRefs) {
+              messageRefs.current[message.id] = el;
+            }
+          }}
+        >
+          <MessageItem message={message} />
+        </div>
       ))}
     </div>
   );
