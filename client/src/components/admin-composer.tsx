@@ -1,0 +1,276 @@
+import { useState, useRef } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus, Image, Video, Smile, Send, X, Settings } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+
+export function AdminComposer() {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [messageText, setMessageText] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const postMessageMutation = useMutation({
+    mutationFn: async (data: { content: string; file?: File; messageType?: string }) => {
+      if (data.file) {
+        const formData = new FormData();
+        formData.append("content", data.content);
+        formData.append("file", data.file);
+        formData.append("messageType", data.messageType || "text");
+        
+        const response = await fetch("/api/messages/upload", {
+          method: "POST",
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error("Failed to upload message");
+        }
+        
+        return response.json();
+      } else {
+        return apiRequest("POST", "/api/messages", {
+          content: data.content,
+          messageType: "text",
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      setMessageText("");
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setIsExpanded(false);
+      toast({
+        title: "Message posted successfully",
+        description: "Your message has been published to the channel.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error posting message",
+        description: "There was an error posting your message. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFileSelect = (file: File, type: "image" | "video") => {
+    setSelectedFile(file);
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+  };
+
+  const handleImageUpload = () => {
+    imageInputRef.current?.click();
+  };
+
+  const handleVideoUpload = () => {
+    videoInputRef.current?.click();
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file, "image");
+    }
+  };
+
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file, "video");
+    }
+  };
+
+  const removeFile = () => {
+    setSelectedFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+  };
+
+  const handlePost = () => {
+    if (!messageText.trim() && !selectedFile) {
+      toast({
+        title: "Empty message",
+        description: "Please enter a message or select a file to post.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const messageType = selectedFile ? 
+      (selectedFile.type.startsWith("image/") ? "image" : "video") : 
+      "text";
+
+    postMessageMutation.mutate({
+      content: messageText,
+      file: selectedFile || undefined,
+      messageType,
+    });
+  };
+
+  const handleCancel = () => {
+    setIsExpanded(false);
+    setMessageText("");
+    removeFile();
+  };
+
+  return (
+    <div className="bg-dark-secondary border-t border-dark-tertiary p-4 sticky bottom-0">
+      {/* Collapsed State */}
+      {!isExpanded && (
+        <div className="mb-4">
+          <button
+            className="w-full bg-dark-tertiary hover:bg-dark-tertiary/80 transition-colors rounded-lg px-4 py-3 text-left text-dark-text-secondary flex items-center justify-between"
+            onClick={() => setIsExpanded(true)}
+          >
+            <span>📝 Post new message...</span>
+            <Plus className="w-5 h-5 text-telegram-blue" />
+          </button>
+        </div>
+      )}
+
+      {/* Expanded Composer */}
+      {isExpanded && (
+        <div>
+          {/* File Preview */}
+          {selectedFile && previewUrl && (
+            <div className="mb-4 bg-dark-tertiary rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-dark-text-secondary">
+                  {selectedFile.type.startsWith("image/") ? "📷 Image attached" : "🎥 Video attached"}
+                </span>
+                <button
+                  className="text-red-400 hover:text-red-300 transition-colors"
+                  onClick={removeFile}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="w-20 h-20 bg-dark-bg rounded border-2 border-dashed border-dark-text-muted overflow-hidden">
+                {selectedFile.type.startsWith("image/") ? (
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <video
+                    src={previewUrl}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Message Input */}
+          <div className="relative mb-4">
+            <Textarea
+              className="w-full bg-dark-tertiary border border-dark-tertiary focus:border-telegram-blue rounded-lg px-4 py-3 text-dark-text placeholder-dark-text-muted resize-none focus:outline-none focus:ring-2 focus:ring-telegram-blue/20 transition-all"
+              rows={4}
+              placeholder="Write your message here..."
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+            />
+            <div className="absolute bottom-2 right-2 text-xs text-dark-text-muted">
+              {messageText.length}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="bg-dark-tertiary hover:bg-dark-tertiary/80 text-dark-text-secondary"
+                onClick={handleImageUpload}
+              >
+                <Image className="w-4 h-4 mr-2 text-telegram-blue" />
+                Photo
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="bg-dark-tertiary hover:bg-dark-tertiary/80 text-dark-text-secondary"
+                onClick={handleVideoUpload}
+              >
+                <Video className="w-4 h-4 mr-2 text-telegram-blue" />
+                Video
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="bg-dark-tertiary hover:bg-dark-tertiary/80 text-dark-text-secondary"
+              >
+                <Smile className="w-4 h-4 mr-2 text-telegram-blue" />
+                Emoji
+              </Button>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                onClick={handleCancel}
+                className="text-dark-text-secondary hover:text-dark-text"
+              >
+                Cancel
+              </Button>
+
+              <Button
+                className="bg-telegram-blue hover:bg-telegram-blue/90 text-white"
+                onClick={handlePost}
+                disabled={postMessageMutation.isPending}
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {postMessageMutation.isPending ? "Posting..." : "Post"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Controls */}
+      <div className="flex items-center justify-center space-x-4 mt-4 pt-4 border-t border-dark-tertiary">
+        <div className="flex items-center space-x-2 text-sm text-dark-text-secondary">
+          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+          <span>Admin Mode</span>
+        </div>
+        <button className="text-sm text-telegram-blue hover:text-telegram-blue/80 transition-colors flex items-center space-x-1">
+          <Settings className="w-4 h-4" />
+          <span>Settings</span>
+        </button>
+      </div>
+
+      {/* Hidden file inputs */}
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageChange}
+      />
+      <input
+        ref={videoInputRef}
+        type="file"
+        accept="video/*"
+        className="hidden"
+        onChange={handleVideoChange}
+      />
+    </div>
+  );
+}
