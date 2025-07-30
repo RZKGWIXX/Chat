@@ -1,3 +1,4 @@
+import React from "react";
 import { Eye, Play, Pin, Heart, Trash2, MoreHorizontal, Copy, FileText, Download } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -18,6 +19,16 @@ interface MessageItemProps {
 export function MessageItem({ message }: MessageItemProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  
+  // Generate a simple user ID for this session
+  const userId = React.useMemo(() => {
+    let id = localStorage.getItem('user_id');
+    if (!id) {
+      id = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('user_id', id);
+    }
+    return id;
+  }, []);
 
   const incrementViewMutation = useMutation({
     mutationFn: async (messageId: string) => {
@@ -43,7 +54,7 @@ export function MessageItem({ message }: MessageItemProps) {
 
   const addReactionMutation = useMutation({
     mutationFn: async (messageId: string) => {
-      await apiRequest("POST", `/api/messages/${messageId}/reaction`);
+      await apiRequest("POST", `/api/messages/${messageId}/reaction`, { userId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
@@ -109,8 +120,8 @@ export function MessageItem({ message }: MessageItemProps) {
       }`}>
         {/* Pin indicator */}
         {message.isPinned && (
-          <div className="absolute top-2 left-2 z-10">
-            <Pin className="w-3 h-3 text-white/80" />
+          <div className="absolute top-2 right-2 z-10 bg-black/20 rounded-full p-1">
+            <Pin className="w-3 h-3 text-white" />
           </div>
         )}
         {/* Media Content */}

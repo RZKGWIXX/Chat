@@ -12,6 +12,7 @@ export const messages = pgTable("messages", {
   viewCount: integer("view_count").notNull().default(0),
   isPinned: integer("is_pinned").notNull().default(0),
   reactionCount: integer("reaction_count").notNull().default(0),
+  userReactions: text("user_reactions").notNull().default("[]"), // JSON array of user IDs who liked
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 

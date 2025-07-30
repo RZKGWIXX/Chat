@@ -11,7 +11,7 @@ export interface IStorage {
   createMessage(message: InsertMessage): Promise<Message>;
   incrementViewCount(messageId: string): Promise<void>;
   togglePin(messageId: string): Promise<void>;
-  addReaction(messageId: string): Promise<void>;
+  toggleReaction(messageId: string, userId: string): Promise<void>;
   deleteMessage(messageId: string): Promise<void>;
   searchMessages(query: string): Promise<Message[]>;
 }
@@ -58,6 +58,7 @@ export class MemStorage implements IStorage {
       viewCount: 0,
       isPinned: 0,
       reactionCount: 0,
+      userReactions: "[]",
       createdAt: new Date(),
     };
     this.messages.set(id, message);
@@ -80,10 +81,23 @@ export class MemStorage implements IStorage {
     }
   }
 
-  async addReaction(messageId: string): Promise<void> {
+  async toggleReaction(messageId: string, userId: string = "anonymous"): Promise<void> {
     const message = this.messages.get(messageId);
     if (message) {
-      message.reactionCount += 1;
+      const userReactions = JSON.parse(message.userReactions || "[]");
+      const userIndex = userReactions.indexOf(userId);
+      
+      if (userIndex > -1) {
+        // Remove reaction
+        userReactions.splice(userIndex, 1);
+        message.reactionCount = Math.max(0, message.reactionCount - 1);
+      } else {
+        // Add reaction
+        userReactions.push(userId);
+        message.reactionCount = userReactions.length;
+      }
+      
+      message.userReactions = JSON.stringify(userReactions);
       this.messages.set(messageId, message);
     }
   }

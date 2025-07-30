@@ -96,14 +96,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add reaction to a message
+  // Toggle reaction to a message
   app.post("/api/messages/:id/reaction", async (req, res) => {
     try {
       const { id } = req.params;
-      await storage.addReaction(id);
+      const userId = req.body.userId || "anonymous";
+      await storage.toggleReaction(id, userId);
       res.json({ success: true });
     } catch (error) {
-      res.status(500).json({ error: "Failed to add reaction" });
+      res.status(500).json({ error: "Failed to toggle reaction" });
     }
   });
 
