@@ -1,15 +1,14 @@
-
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./server",
-    "module": "CommonJS",
+    "rootDir": "./",                    // було: "./server"
+    "module": "esnext",                 // було: "CommonJS"
     "target": "ES2020",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
-  "include": ["server/**/*"],
+  "include": ["server/**/*", "shared/**/*"], // дозволяє імпорти з shared
   "exclude": ["node_modules", "client"]
 }
