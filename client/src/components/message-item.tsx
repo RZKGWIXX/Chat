@@ -17,7 +17,7 @@ export function MessageItem({ message }: MessageItemProps) {
   const [showEmojiBar, setShowEmojiBar] = React.useState(false);
   const [contextMenuPosition, setContextMenuPosition] = React.useState({ x: 0, y: 0 });
   const [longPressTimer, setLongPressTimer] = React.useState<NodeJS.Timeout | null>(null);
-  
+
   // Generate a simple user ID for this session
   const userId = React.useMemo(() => {
     let id = localStorage.getItem('user_id');
@@ -290,10 +290,12 @@ export function MessageItem({ message }: MessageItemProps) {
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center space-x-2 text-white/70">
                   <span>{formatTime(message.createdAt)}</span>
-                  <div className="flex items-center space-x-1">
-                    <Eye className="w-3 h-3" />
-                    <span>{formatViews(message.viewCount)}</span>
-                  </div>
+                  {message.viewCount > 0 && (
+                    <div className="flex items-center space-x-1">
+                      <Eye className="w-3 h-3" />
+                      <span>{formatViews(message.viewCount)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -305,10 +307,12 @@ export function MessageItem({ message }: MessageItemProps) {
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center space-x-2 text-white/70">
                   <span>{formatTime(message.createdAt)}</span>
-                  <div className="flex items-center space-x-1">
-                    <Eye className="w-3 h-3" />
-                    <span>{formatViews(message.viewCount)}</span>
-                  </div>
+                  {message.viewCount > 0 && (
+                    <div className="flex items-center space-x-1">
+                      <Eye className="w-3 h-3" />
+                      <span>{formatViews(message.viewCount)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -389,7 +393,7 @@ export function MessageItem({ message }: MessageItemProps) {
             <Reply className="w-4 h-4" />
             <span>Reply</span>
           </button>
-          
+
           <button
             className="w-full px-4 py-2 text-left text-white hover:bg-dark-tertiary transition-colors flex items-center space-x-3"
             onClick={handleCopy}
@@ -397,7 +401,7 @@ export function MessageItem({ message }: MessageItemProps) {
             <Copy className="w-4 h-4" />
             <span>Copy</span>
           </button>
-          
+
           <button
             className="w-full px-4 py-2 text-left text-white hover:bg-dark-tertiary transition-colors flex items-center space-x-3"
             onClick={handlePin}
@@ -405,7 +409,7 @@ export function MessageItem({ message }: MessageItemProps) {
             <Pin className="w-4 h-4" />
             <span>{message.isPinned ? 'Unpin' : 'Pin'}</span>
           </button>
-          
+
           <button
             className="w-full px-4 py-2 text-left text-white hover:bg-dark-tertiary transition-colors flex items-center space-x-3"
             onClick={() => {
@@ -419,9 +423,9 @@ export function MessageItem({ message }: MessageItemProps) {
             <Edit className="w-4 h-4" />
             <span>Edit</span>
           </button>
-          
+
           <div className="border-t border-dark-tertiary my-1" />
-          
+
           <button
             className="w-full px-4 py-2 text-left text-red-400 hover:bg-dark-tertiary transition-colors flex items-center space-x-3"
             onClick={handleDelete}
